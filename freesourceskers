@@ -1,0 +1,188 @@
+-- Services
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Variables for Settings
+local walkSpeedValue = 29.5
+local jumpPowerValue = 40
+local toggleKey = Enum.KeyCode.T
+local isEnabled = false
+
+-- Theme Color
+local ThemeRed = Color3.fromRGB(180, 0, 0)
+local DarkRed = Color3.fromRGB(100, 0, 0)
+local Background = Color3.fromRGB(15, 10, 10)
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Kers0nez_Booster"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Floating Toggle Button (To open/close the GUI)
+local OpenButton = Instance.new("TextButton")
+OpenButton.Name = "ToggleMenu"
+OpenButton.Size = UDim2.new(0, 50, 0, 50)
+OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
+OpenButton.BackgroundColor3 = ThemeRed
+OpenButton.Text = "K"
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.Font = Enum.Font.GothamBold
+OpenButton.TextSize = 24
+OpenButton.Parent = ScreenGui
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(1, 0) -- Circle
+OpenCorner.Parent = OpenButton
+
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color = Color3.fromRGB(255, 255, 255)
+OpenStroke.Thickness = 2
+OpenStroke.Parent = OpenButton
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 250, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -160)
+MainFrame.BackgroundColor3 = Background
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = true
+MainFrame.Active = true
+MainFrame.Draggable = true -- Enabled dragging
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 15)
+UICorner.Parent = MainFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = ThemeRed
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+-- Title (Updated Name)
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -20, 0, 40)
+Title.Position = UDim2.new(0, 15, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "leaked by @kers0nez"
+Title.TextColor3 = ThemeRed
+Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = MainFrame
+
+-- Helper function for Input Rows
+local function createRow(name, value, pos)
+	local Label = Instance.new("TextLabel")
+	Label.Size = UDim2.new(0, 100, 0, 40)
+	Label.Position = UDim2.new(0, 20, 0, pos)
+	Label.BackgroundTransparency = 1
+	Label.Text = name
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.TextSize = 14
+	Label.Font = Enum.Font.GothamBold
+	Label.Parent = MainFrame
+
+	local Box = Instance.new("TextBox")
+	Box.Size = UDim2.new(0, 90, 0, 40)
+	Box.Position = UDim2.new(1, -110, 0, pos)
+	Box.BackgroundColor3 = Color3.fromRGB(30, 20, 20)
+	Box.Text = tostring(value)
+	Box.TextColor3 = ThemeRed
+	Box.Font = Enum.Font.GothamBold
+	Box.TextSize = 16
+	Box.Parent = MainFrame
+
+	local BoxCorner = Instance.new("UICorner")
+	BoxCorner.CornerRadius = UDim.new(0, 6)
+	BoxCorner.Parent = Box
+    
+    local BoxStroke = Instance.new("UIStroke")
+    BoxStroke.Color = DarkRed
+    BoxStroke.Thickness = 1
+    BoxStroke.Parent = Box
+	
+	return Box
+end
+
+local SpeedInput = createRow("SPEED", walkSpeedValue, 70)
+local JumpInput = createRow("JUMP", jumpPowerValue, 120)
+local BindInput = createRow("BIND", "T", 170)
+
+-- Toggle Button
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(1, -40, 0, 50)
+ToggleBtn.Position = UDim2.new(0, 20, 0, 230)
+ToggleBtn.BackgroundColor3 = ThemeRed
+ToggleBtn.Text = "OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 20
+ToggleBtn.Parent = MainFrame
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 10)
+BtnCorner.Parent = ToggleBtn
+
+-- Discord Footer (Updated Link)
+local Footer = Instance.new("TextLabel")
+Footer.Size = UDim2.new(1, 0, 0, 20)
+Footer.Position = UDim2.new(0, 0, 1, -25)
+Footer.BackgroundTransparency = 1
+Footer.Text = "https://discord.gg/ruhhvbJPS"
+Footer.TextColor3 = Color3.fromRGB(150, 150, 150)
+Footer.TextSize = 11
+Footer.Font = Enum.Font.Gotham
+Footer.Parent = MainFrame
+
+--- Logic ---
+
+-- Show/Hide Frame with Floating Button
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+local function updateStats()
+	local char = player.Character
+	if char and char:FindFirstChild("Humanoid") then
+		if isEnabled then
+			char.Humanoid.WalkSpeed = tonumber(SpeedInput.Text) or 16
+			char.Humanoid.JumpPower = tonumber(JumpInput.Text) or 50
+		else
+			char.Humanoid.WalkSpeed = 16
+			char.Humanoid.JumpPower = 50
+		end
+	end
+end
+
+local function toggle()
+	isEnabled = not isEnabled
+	ToggleBtn.Text = isEnabled and "ON" or "OFF"
+	ToggleBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(255, 50, 50) or ThemeRed
+    ToggleBtn.TextColor3 = isEnabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 200)
+	updateStats()
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == toggleKey then
+		toggle()
+	end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(toggle)
+
+RunService.RenderStepped:Connect(updateStats)
+
+BindInput.FocusLost:Connect(function()
+	local key = BindInput.Text:upper()
+	pcall(function()
+		toggleKey = Enum.KeyCode[key]
+	end)
+end)
